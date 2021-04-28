@@ -1,16 +1,16 @@
 variable "subscription_id" {
-    type = string
+  type = string
 }
 
 variable "cluster_name" {
-    type = string
+  type = string
 }
 
 variable "location" {
-    type = string 
-    default = "East US"
+  type    = string
+  default = "East US"
 }
 
 variable "cluster_admin_oids" {
-    type = list
+  type = list(any)
 }
