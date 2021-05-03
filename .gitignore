@@ -29,5 +29,3 @@ override.tf.json
 # example: *tfplan*
 sp-login.sh
 backend.tfvars
-
-.terraform.lock.hcl
