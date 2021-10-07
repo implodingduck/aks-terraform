@@ -72,7 +72,7 @@ resource "azurerm_kubernetes_cluster" "example" {
   name                = local.cluster_name
   location            = azurerm_resource_group.aks.location
   resource_group_name = azurerm_resource_group.aks.name
-  dns_prefix          = replace(replace(replace(var.cluster_name, "-", ""), "_", ""), " ", "")
+  dns_prefix          = local.cluster_name
   kubernetes_version  = "1.21.2"
   default_node_pool {
     name            = "default"
