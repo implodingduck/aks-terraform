@@ -2,11 +2,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=2.46.0"
+      version = "=2.71.0"
     }
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = "=1.4.0"
+    random = {
+      source  = "hashicorp/random"
+      version = "=3.1.0"
     }
   }
   backend "azurerm" {
@@ -14,25 +14,28 @@ terraform {
   }
 }
 
-# Configure the Microsoft Azure Provider
 provider "azurerm" {
   features {}
 
   subscription_id = var.subscription_id
 }
 
-provider "azuread" {
-
-}
-
 locals {
+  cluster_name = "aksterra${random_string.unique.result}"
   loc_for_naming = lower(replace(var.location, " ", ""))
+  tags = {
+    "managed_by" = "terraform"
+    "repo"       = "aks-terraform"
+  }
 }
 
-resource "azuread_group" "aksadmin" {
-  display_name = "aks-${var.cluster_name}-admins"
-  owners       = var.cluster_admin_oids
-  members      = var.cluster_admin_oids
+data "azurerm_client_config" "current" {}
+
+
+resource "random_string" "unique" {
+  length  = 8
+  special = false
+  upper   = false
 }
 
 resource "azurerm_resource_group" "aks" {
@@ -47,9 +50,7 @@ resource "azurerm_virtual_network" "default" {
   resource_group_name = azurerm_resource_group.aks.name
   address_space       = ["10.0.0.0/16"]
 
-  tags = {
-    managed_by = "terraform"
-  }
+  tags = local.tags
 }
 
 resource "azurerm_subnet" "default" {
@@ -57,14 +58,13 @@ resource "azurerm_subnet" "default" {
   resource_group_name  = azurerm_resource_group.aks.name
   virtual_network_name = azurerm_virtual_network.default.name
   address_prefixes     = ["10.0.0.0/24"]
-
 }
 
 resource "azurerm_subnet" "cluster" {
   name                 = "${var.cluster_name}-subnet-${local.loc_for_naming}"
   resource_group_name  = azurerm_resource_group.aks.name
   virtual_network_name = azurerm_virtual_network.default.name
-  address_prefixes     = ["10.0.2.0/24"]
+  address_prefixes     = ["10.0.2.0/23"]
 
 }
 
@@ -73,7 +73,7 @@ resource "azurerm_kubernetes_cluster" "example" {
   location            = azurerm_resource_group.aks.location
   resource_group_name = azurerm_resource_group.aks.name
   dns_prefix          = replace(replace(replace(var.cluster_name, "-", ""), "_", ""), " ", "")
-  kubernetes_version  = "1.20.5"
+  kubernetes_version  = "1.21.2"
   default_node_pool {
     name            = "default"
     node_count      = 1
@@ -95,18 +95,6 @@ resource "azurerm_kubernetes_cluster" "example" {
     type = "SystemAssigned"
   }
 
-
-  role_based_access_control {
-    enabled = true
-    azure_active_directory {
-      managed                = true
-      admin_group_object_ids = [azuread_group.aksadmin.object_id]
-    }
-  }
-
-  tags = {
-    managed_by  = "terraform"
-    my_demo_tag = "demo time"
-  }
+  tags = local.tags
 }
 
