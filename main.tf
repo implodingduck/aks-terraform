@@ -91,6 +91,11 @@ resource "azurerm_kubernetes_cluster" "example" {
     docker_bridge_cidr = "172.17.0.1/16"
   }
 
+  role_based_access_control {
+    enabled = true
+    
+  }
+
   identity {
     type = "SystemAssigned"
   }
