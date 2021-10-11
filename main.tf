@@ -72,7 +72,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   name                = local.cluster_name
   location            = azurerm_resource_group.aks.location
   resource_group_name = azurerm_resource_group.aks.name
-  dns_prefix          = local.cluster_name
+  dns_prefix          = "quackersbank" #local.cluster_name
   kubernetes_version  = "1.21.2"
   default_node_pool {
     name            = "default"
