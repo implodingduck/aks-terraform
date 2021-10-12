@@ -26,7 +26,7 @@ stages:
       - task: AzureCLI@2
         displayName: Enable AKS Preview
         inputs:
-          azureSubscriptoin: ARM_SUBSCRIPTION
+          azureSubscription: ARM_SUBSCRIPTION
           scriptType: bash
           addSpnToEnvironment: true
           scriptLocation: inlineScript
