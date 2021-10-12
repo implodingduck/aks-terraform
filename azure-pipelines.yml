@@ -28,6 +28,7 @@ stages:
         inputs:
           azureSubscriptoin: ARM_SUBSCRIPTION
           scriptType: bash
+          addSpnToEnvironment: true
           scriptLocation: inlineScript
           inlineScript: |
             az extension add --name aks-preview
