@@ -31,6 +31,10 @@ locals {
 
 data "azurerm_client_config" "current" {}
 
+data "azurerm_log_analytics_workspace" "default" {
+  name                = "DefaultWorkspace-${data.azurerm_client_config.current.subscription_id}-EUS"
+  resource_group_name = "DefaultResourceGroup-EUS"
+}  
 
 resource "random_string" "unique" {
   length  = 8
@@ -98,6 +102,13 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   identity {
     type = "SystemAssigned"
+  }
+  
+  addon_profile {
+    oms_agent {
+      enabled                    = true
+      log_analytics_workspace_id = data.azurerm_log_analytics_workspace.default.id
+    }
   }
 
   tags = local.tags
