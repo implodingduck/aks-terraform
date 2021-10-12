@@ -24,6 +24,17 @@ stages:
       - script: terraform --version
         displayName: 'check terraform version'
       - task: AzureCLI@2
+        displayName: Enable AKS Preview
+        inputs:
+          azureSubscriptoin: ARM_SUBSCRIPTION
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            az extension add --name aks-preview
+            az feature register --namespace Microsoft.ContainerService -n AutoUpgradePreview
+            az feature list -o table --query "[?contains(name, 'Microsoft.ContainerService/AutoUpgradePreview')].{Name:name,State:properties.state}"
+            az provider register --namespace Microsoft.ContainerService
+      - task: AzureCLI@2
         displayName: "Terraform Init"
         inputs:
           azureSubscription: ARM_SUBSCRIPTION
